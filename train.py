@@ -27,7 +27,7 @@ parser.add_argument(
     '--token_regex', default='\w+', help='tokenizing regex')
 
 parser.add_argument(
-    '--min_freq', default=5, help='min frequency for vocab')
+    '--min_freq', default=5, type=int, help='min frequency for vocab')
 
 parser.add_argument(
     '--num_epochs', default=10, type=int, help='number of epochs')

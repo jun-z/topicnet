@@ -23,6 +23,11 @@ def get_logger(name, level=logging.INFO) -> logging.Logger:
     return logger
 
 
+def log_args(logger: logging.Logger, args):
+    for k, v in vars(args).items():
+        logger.info(f'--{k}:{v}')
+
+
 def split_data(dataset: data.TabularDataset,
                fields,
                random_seed=1123,

@@ -83,6 +83,8 @@ def train():
     # Logger.
     logger = helpers.get_logger('training')
 
+    helpers.log_args(logger, args)
+
     # Prepare training and validation data.
     WORD = re.compile(args.token_regex)
 

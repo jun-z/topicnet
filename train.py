@@ -101,7 +101,7 @@ def train():
     logger.info(f'Loaded training data: {args.train_file}')
 
     TEXT.build_vocab(train_set,
-                     min_freq=5,
+                     min_freq=args.min_freq,
                      vectors=args.pretrained_embeddings)
 
     LABEL.build_vocab(train_set)

@@ -15,7 +15,7 @@ class TopicLayer(nn.Module):
 
         self.topic_embeddings = nn.ModuleList()
         for i in range(num_topics):
-            self.topic_embeddings.append(nn.Embedding(vocab_size. num_topic_filters))
+            self.topic_embeddings.append(nn.Embedding(vocab_size, num_topic_filters))
 
         if self.shared_filters:
             self.shared_embedding = nn.Embedding(vocab_size, num_shared_filters)

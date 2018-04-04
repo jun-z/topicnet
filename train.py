@@ -60,9 +60,6 @@ parser.add_argument(
     '--growth_rate', default=8, type=int, help='growth rate')
 
 parser.add_argument(
-    '--dropout_prob', default=.5, type=float, help='dropout probability')
-
-parser.add_argument(
     '--disable_cuda', action='store_true', help='disable cuda')
 
 parser.add_argument(
@@ -117,8 +114,7 @@ def train():
                                     args.num_shared_filters,
                                     args.num_dense_layers,
                                     args.filter_size,
-                                    args.growth_rate,
-                                    args.dropout_prob)
+                                    args.growth_rate)
 
     if args.cuda:
         classifier.cuda(device=args.device_id)

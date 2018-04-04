@@ -13,8 +13,7 @@ class TopicNetClassifier(nn.Module):
                  num_shared_filters,
                  num_dense_layers,
                  filter_size,
-                 growth_rate,
-                 dropout_prob):
+                 growth_rate):
 
         super(TopicNetClassifier, self).__init__()
 

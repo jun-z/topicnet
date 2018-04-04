@@ -23,10 +23,10 @@ class TopicLayer(nn.Module):
     def forward(self, sequence):
         topics = []
         for topic_embedding in self.topic_embeddings:
-            topics.append(topic_embedding(sequence).tranpose(1, 2))
+            topics.append(topic_embedding(sequence).transpose(1, 2))
 
         if self.shared_filters:
-            shared_topic = self.shared_embedding(sequence).tranpose(1, 2)
+            shared_topic = self.shared_embedding(sequence).transpose(1, 2)
             topics = [torch.cat([topic, shared_topic], 1) for topic in topics]
 
         return topics

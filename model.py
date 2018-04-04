@@ -18,6 +18,8 @@ class TopicNetClassifier(nn.Module):
 
         super(TopicNetClassifier, self).__init__()
 
+        self.num_filters = num_topic_filters + num_shared_filters
+
         self.topic_layer = TopicLayer(vocab_size,
                                       num_topics,
                                       num_topic_filters,
@@ -25,15 +27,16 @@ class TopicNetClassifier(nn.Module):
 
         self.dense_nets = nn.ModuleList()
         for i in range(num_topics):
-            self.dense_nets.append(DenseNet(num_dense_layers,
-                                            num_topic_filters + num_shared_filters,
-                                            filter_size=filter_size,
-                                            growth_rate=growth_rate))
+            self.dense_nets.append(DenseNet(self.num_filters,
+                                            num_dense_layers,
+                                            growth_rate=growth_rate,
+                                            filter_size=filter_size))
+
+        self.num_filters += num_dense_layers * growth_rate
 
         self.projs = nn.ModuleList()
         for i in range(num_topics):
-            self.projs.append(nn.Linear(num_dense_layers * growth_rate,
-                                        labelset_size))
+            self.projs.append(nn.Linear(self.num_filters, labelset_size))
 
         self.softmax = nn.LogSoftmax(dim=1)
 

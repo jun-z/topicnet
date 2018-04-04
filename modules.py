@@ -34,16 +34,16 @@ class TopicLayer(nn.Module):
 
 class DenseLayer(nn.Sequential):
     def __init__(self,
-                 num_filters,
-                 filter_size,
+                 num_input_filters,
                  growth_rate,
+                 filter_size,
                  padding):
 
         super(DenseLayer, self).__init__()
 
-        self.add_module('norm', nn.BatchNorm2d(num_filters))
+        self.add_module('norm', nn.BatchNorm2d(num_input_filters))
         self.add_module('relu', nn.ReLU())
-        self.add_module('conv', nn.Conv2d(num_filters,
+        self.add_module('conv', nn.Conv2d(num_input_filters,
                                           growth_rate,
                                           (1, filter_size),
                                           padding=padding))
@@ -55,41 +55,25 @@ class DenseLayer(nn.Sequential):
 
 class DenseNet(nn.Module):
     def __init__(self,
+                 num_input_filters,
                  num_layers,
-                 num_filters,
-                 filter_size,
-                 growth_rate):
+                 growth_rate,
+                 filter_size):
 
         super(DenseNet, self).__init__()
 
-        self.padding = (0, max(0, (filter_size - 1) // 2))
-
         self.layers = nn.Sequential()
-        self.layers.add_module('norm-0', nn.BatchNorm2d(1))
-        self.layers.add_module('relu-0', nn.ReLU())
-        self.layers.add_module('conv-0', nn.Conv2d(1,
-                                                   growth_rate,
-                                                   (num_filters, filter_size),
-                                                   padding=self.padding))
-
-        num_feature_maps = growth_rate
         for i in range(num_layers):
             self.layers.add_module(f'dense-{i}',
-                                   DenseLayer(num_feature_maps,
-                                              filter_size,
+                                   DenseLayer(num_input_filters,
                                               growth_rate,
-                                              padding=self.padding))
-            num_feature_maps += growth_rate
+                                              filter_size,
+                                              padding=(0, (filter_size - 1) // 2)))
+            num_input_filters += growth_rate
 
-        self.layers.add_module('norm-1', nn.BatchNorm2d(num_feature_maps))
-        self.layers.add_module('relu-1', nn.ReLU())
-        self.layers.add_module('conv-1', nn.Conv2d(num_feature_maps,
-                                                   num_layers * growth_rate,
-                                                   (1, filter_size),
-                                                   padding=self.padding))
-        self.layers.add_module('relu-2', nn.ReLU())
+        self.layers.add_module('activation', nn.ReLU())
 
     def forward(self, topic):
-        topic = topic.unsqueeze(1)
-        feature_maps = self.layers(topic).squeeze(2)
-        return feature_maps.max(2)[0]
+        topic = topic.unsqueeze(2)
+        feature_maps = self.layers(topic)
+        return feature_maps.squeeze(2).max(2)[0]

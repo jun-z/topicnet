@@ -42,12 +42,6 @@ parser.add_argument(
     '--print_every', default=100, type=int, help='print every n iterations')
 
 parser.add_argument(
-    '--embedding_dim', default=300, type=int, help='embedding dimension')
-
-parser.add_argument(
-    '--pretrained_embeddings', type=str, help='pretrained embeddings')
-
-parser.add_argument(
     '--num_topics', default=16, type=int, help='number of topics')
 
 parser.add_argument(
@@ -64,9 +58,6 @@ parser.add_argument(
 
 parser.add_argument(
     '--growth_rate', default=8, type=int, help='growth rate')
-
-parser.add_argument(
-    '--dropout_prob', default=.5, type=float, help='dropout probability')
 
 parser.add_argument(
     '--disable_cuda', action='store_true', help='disable cuda')
@@ -101,8 +92,7 @@ def train():
     logger.info(f'Loaded training data: {args.train_file}')
 
     TEXT.build_vocab(train_set,
-                     min_freq=args.min_freq,
-                     vectors=args.pretrained_embeddings)
+                     min_freq=args.min_freq)
 
     LABEL.build_vocab(train_set)
 
@@ -119,15 +109,12 @@ def train():
     # Initialize classifier, criterion, and optimizer.
     classifier = TopicNetClassifier(len(TEXT.vocab),
                                     len(LABEL.vocab),
-                                    args.embedding_dim,
                                     args.num_topics,
                                     args.num_topic_filters,
                                     args.num_shared_filters,
                                     args.num_dense_layers,
                                     args.filter_size,
-                                    args.growth_rate,
-                                    args.dropout_prob,
-                                    TEXT.vocab.vectors)
+                                    args.growth_rate)
 
     if args.cuda:
         classifier.cuda(device=args.device_id)

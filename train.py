@@ -42,12 +42,6 @@ parser.add_argument(
     '--print_every', default=100, type=int, help='print every n iterations')
 
 parser.add_argument(
-    '--embedding_dim', default=300, type=int, help='embedding dimension')
-
-parser.add_argument(
-    '--pretrained_embeddings', type=str, help='pretrained embeddings')
-
-parser.add_argument(
     '--num_topics', default=16, type=int, help='number of topics')
 
 parser.add_argument(
@@ -101,8 +95,7 @@ def train():
     logger.info(f'Loaded training data: {args.train_file}')
 
     TEXT.build_vocab(train_set,
-                     min_freq=args.min_freq,
-                     vectors=args.pretrained_embeddings)
+                     min_freq=args.min_freq)
 
     LABEL.build_vocab(train_set)
 
@@ -119,15 +112,13 @@ def train():
     # Initialize classifier, criterion, and optimizer.
     classifier = TopicNetClassifier(len(TEXT.vocab),
                                     len(LABEL.vocab),
-                                    args.embedding_dim,
                                     args.num_topics,
                                     args.num_topic_filters,
                                     args.num_shared_filters,
                                     args.num_dense_layers,
                                     args.filter_size,
                                     args.growth_rate,
-                                    args.dropout_prob,
-                                    TEXT.vocab.vectors)
+                                    args.dropout_prob)
 
     if args.cuda:
         classifier.cuda(device=args.device_id)

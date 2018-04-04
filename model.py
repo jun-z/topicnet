@@ -8,24 +8,17 @@ class TopicNetClassifier(nn.Module):
     def __init__(self,
                  vocab_size,
                  labelset_size,
-                 embedding_dim,
                  num_topics,
                  num_topic_filters,
                  num_shared_filters,
                  num_dense_layers,
                  filter_size,
                  growth_rate,
-                 dropout_prob,
-                 pretrained_embeddings=None):
+                 dropout_prob):
 
         super(TopicNetClassifier, self).__init__()
 
-        self.embedding = nn.Embedding(vocab_size, embedding_dim)
-
-        if pretrained_embeddings is not None:
-            self.embedding.weight.data.copy_(pretrained_embeddings)
-
-        self.topic_layer = TopicLayer(embedding_dim,
+        self.topic_layer = TopicLayer(vocab_size,
                                       num_topics,
                                       num_topic_filters,
                                       num_shared_filters)
@@ -45,9 +38,7 @@ class TopicNetClassifier(nn.Module):
         self.softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, sequence):
-        embeddings = self.embedding(sequence)
-
-        topics = self.topic_layer(embeddings)
+        topics = self.topic_layer(sequence)
 
         feature_vecs = []
         for topic, dense_net in zip(topics, self.dense_nets):

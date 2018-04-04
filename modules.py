@@ -4,7 +4,7 @@ import torch.nn as nn
 
 class TopicLayer(nn.Module):
     def __init__(self,
-                 embedding_dim,
+                 vocab_size,
                  num_topics,
                  num_topic_filters,
                  num_shared_filters):
@@ -13,26 +13,20 @@ class TopicLayer(nn.Module):
 
         self.shared_filters = num_shared_filters > 0
 
-        self.topic_convs = nn.ModuleList()
+        self.topic_embeddings = nn.ModuleList()
         for i in range(num_topics):
-            self.topic_convs.append(nn.Conv2d(1,
-                                              num_topic_filters,
-                                              (1, embedding_dim)))
+            self.topic_embeddings.append(nn.Embedding(vocab_size. num_topic_filters))
 
         if self.shared_filters:
-            self.shared_conv = nn.Conv2d(1,
-                                         num_shared_filters,
-                                         (1, embedding_dim))
+            self.shared_embedding = nn.Embedding(vocab_size, num_shared_filters)
 
-    def forward(self, embeddings):
-        embeddings = embeddings.unsqueeze(1)
-
+    def forward(self, sequence):
         topics = []
-        for conv in self.topic_convs:
-            topics.append(conv(embeddings).squeeze(-1))
+        for topic_embedding in self.topic_embeddings:
+            topics.append(topic_embedding(sequence).tranpose(1, 2))
 
         if self.shared_filters:
-            shared_topic = self.shared_conv(embeddings).squeeze(-1)
+            shared_topic = self.shared_embedding(sequence).tranpose(1, 2)
             topics = [torch.cat([topic, shared_topic], 1) for topic in topics]
 
         return topics

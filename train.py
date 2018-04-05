@@ -106,7 +106,7 @@ def train():
     logger.info(f'Size of vocabulary: {len(TEXT.vocab)}')
     logger.info(f'Number of labels: {len(LABEL.vocab)}')
 
-    # Initialize classifier, criterion, and optimizer.
+    # Initialize classifier and criterion.
     classifier = TopicNetClassifier(len(TEXT.vocab),
                                     len(LABEL.vocab),
                                     args.num_topics,
@@ -120,7 +120,6 @@ def train():
         classifier.cuda(device=args.device_id)
 
     criterion = nn.NLLLoss()
-    optimizer = optim.Adam(classifier.parameters(), args.learning_rate)
 
     # Training.
     iterator = data.BucketIterator(train_set,
@@ -128,11 +127,18 @@ def train():
                                    lambda x: len(x.text),
                                    device=args.device_id if args.cuda else -1)
 
+    last_epoch = 0
+    gamma = (1e-5 / args.learning)**(1 / args.num_epochs)
+    learning_rate = args.learning_rate
     for batch in iterator:
-        optimizer.zero_grad()
+        classifier.zero_grad()
         loss = criterion(classifier(batch.text), batch.label)
         loss.backward()
-        optimizer.step()
+
+        # Clip gradient and make an SGD step.
+        torch.nn.utils.clip_grad_norm(classifier.parameters(), args.gradient_clipping)
+        for param in classifier.parameters():
+            param.data.add_(-learning_rate, param.grad.data)
 
         progress, epoch = math.modf(iterator.epoch)
 
@@ -150,6 +156,11 @@ def train():
             logger.info(f'Validation accuracy: {accuracy:<6.2%}')
             logger.info(f'Average validation loss: {valid_loss:6.4f}')
             classifier.train()
+
+        # Decay learning rate for each new epoch.
+        if epoch > last_epoch:
+            last_epoch = epoch
+            learning_rate *= gamma
 
         if epoch == args.num_epochs:
             break

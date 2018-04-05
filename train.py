@@ -39,6 +39,9 @@ parser.add_argument(
     '--learning_rate', default=1e-3, type=float, help='learning rate')
 
 parser.add_argument(
+    '--gradient_clipping', default=5.0, type=float, help='gradient clipping')
+
+parser.add_argument(
     '--print_every', default=100, type=int, help='print every n iterations')
 
 parser.add_argument(

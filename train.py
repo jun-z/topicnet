@@ -128,7 +128,7 @@ def train():
                                    device=args.device_id if args.cuda else -1)
 
     last_epoch = 0
-    gamma = (1e-5 / args.learning)**(1 / args.num_epochs)
+    gamma = (1e-5 / args.learning_rate)**(1 / args.num_epochs)
     learning_rate = args.learning_rate
     for batch in iterator:
         classifier.zero_grad()
